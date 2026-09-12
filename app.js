@@ -34,10 +34,9 @@ function currentFilters() {
 }
 function applyFilters() {
   const f = currentFilters();
-  $("payLab").textContent = f.pay ? (£50k display, f.pay + "k+ equiv.") : "Any";
-  if (f.pay) $("payLab").textContent = f.pay + "k+ equiv.";
+  $("payLab").textContent = f.pay ? (f.pay + "k+ equiv.") : "Any";
   let rows = jobs.filter((j) => {
-    const blob = `${j.title} ${j.company} ${j.blurb}`.toLowerCase();
+    const blob = (j.title + " " + j.company + " " + j.blurb).toLowerCase();
     if (f.q && !blob.includes(f.q)) return false;
     if (f.where && !j.location.toLowerCase().includes(f.where) && !(f.where.includes("remote") && j.remote)) return false;
     if (f.remote && !j.remote) return false;
@@ -64,50 +63,44 @@ function resetFilters() {
   applyFilters();
 }
 function render(rows) {
-  $("count").textContent = `${rows.length} role${rows.length === 1 ? "" : "s"} that pass the bar`;
-  $("list").innerHTML = rows.map((j) => `
-    <article class="card" onclick="openJob(${j.id})">
-      <div class="card-top">
-        <div>
-          <div class="company">${j.company} · ${j.posted}</div>
-          <h3 style="margin:4px 0 0;font-size:26px">${j.title}</h3>
-        </div>
-        <div class="pay">${j.pay}</div>
-      </div>
-      <div class="meta">
-        <span class="tag">${j.location}</span>
-        <span class="tag">${j.type}</span>
-        <span class="tag ${j.visa ? "good" : ""}">${j.visa ? "Visa ok" : "No visa"}</span>
-        <span class="tag ${j.junior ? "good" : ""}">${j.junior ? "Juniors welcome" : "Mid+"}</span>
-        <span class="tag ${j.takehome ? "" : "good"}">${j.takehome ? "Take-home" : "No take-home"}</span>
-        <span class="tag">Interview ~${j.hours}h</span>
-        <span class="tag">Replies in ${j.replyDays}d</span>
-      </div>
-      <p style="margin:6px 0 0;color:var(--mute)">${j.blurb}</p>
-    </article>
-  `).join("") || `<p style="color:var(--mute)">Nothing matches. Loosen a filter — we would rather show zero than junk.</p>`;
+  $("count").textContent = rows.length + " role" + (rows.length === 1 ? "" : "s") + " that pass the bar";
+  $("list").innerHTML = rows.map((j) => {
+    return '<article class="card" onclick="openJob(' + j.id + ')">' +
+      '<div class="card-top"><div><div class="company">' + j.company + ' · ' + j.posted + '</div>' +
+      '<h3 style="margin:4px 0 0;font-size:26px">' + j.title + '</h3></div>' +
+      '<div class="pay">' + j.pay + '</div></div>' +
+      '<div class="meta">' +
+      '<span class="tag">' + j.location + '</span>' +
+      '<span class="tag">' + j.type + '</span>' +
+      '<span class="tag ' + (j.visa ? 'good' : '') + '">' + (j.visa ? 'Visa ok' : 'No visa') + '</span>' +
+      '<span class="tag ' + (j.junior ? 'good' : '') + '">' + (j.junior ? 'Juniors welcome' : 'Mid+') + '</span>' +
+      '<span class="tag ' + (j.takehome ? '' : 'good') + '">' + (j.takehome ? 'Take-home' : 'No take-home') + '</span>' +
+      '<span class="tag">Interview ~' + j.hours + 'h</span>' +
+      '<span class="tag">Replies in ' + j.replyDays + 'd</span></div>' +
+      '<p style="margin:6px 0 0;color:var(--mute)">' + j.blurb + '</p></article>';
+  }).join('') || '<p style="color:var(--mute)">Nothing matches. Loosen a filter.</p>';
 }
 function openJob(id) {
   const j = jobs.find((x) => x.id === id);
   if (!j) return;
   $("drawer").hidden = false;
-  $("drawerCard").innerHTML = `
-    <button class="text" onclick="closeJob()">Close</button>
-    <p class="company" style="margin-top:16px">${j.company}</p>
-    <h2 style="margin:4px 0 8px;font-size:40px">${j.title}</h2>
-    <p class="pay">${j.pay}</p>
-    <p style="color:var(--mute)">${j.location} · ${j.type}</p>
-    <p>${j.blurb}</p>
-    <p><strong>Hiring manager</strong><br>${j.manager}</p>
-    <div class="proc">${j.process.map((s, i) => `<div class="step"><span class="dot"></span><span>${i + 1}. ${s}</span></div>`).join("")}</div>
-    <p style="color:var(--mute)">Total interview time about ${j.hours} hours. First reply target: ${j.replyDays} days.</p>
-    <button class="solid" onclick="applyNow('${j.company}')">Apply with one page</button>
-    <p class="fine">We send your profile once. If they ghost past the SLA, we flag the listing.</p>
-  `;
+  const steps = j.process.map((s, i) => '<div class="step"><span class="dot"></span><span>' + (i + 1) + '. ' + s + '</span></div>').join('');
+  $("drawerCard").innerHTML =
+    '<button class="text" onclick="closeJob()">Close</button>' +
+    '<p class="company" style="margin-top:16px">' + j.company + '</p>' +
+    '<h2 style="margin:4px 0 8px;font-size:40px">' + j.title + '</h2>' +
+    '<p class="pay">' + j.pay + '</p>' +
+    '<p style="color:var(--mute)">' + j.location + ' · ' + j.type + '</p>' +
+    '<p>' + j.blurb + '</p>' +
+    '<p><strong>Hiring manager</strong><br>' + j.manager + '</p>' +
+    '<div class="proc">' + steps + '</div>' +
+    '<p style="color:var(--mute)">Total interview time about ' + j.hours + ' hours. First reply target: ' + j.replyDays + ' days.</p>' +
+    '<button class="solid" onclick="applyNow(\'' + j.company + '\')">Apply with one page</button>' +
+    '<p class="fine">We send your profile once. If they ghost past the SLA, we flag the listing.</p>';
 }
 function closeJob() { $("drawer").hidden = true; }
 function applyNow(company) {
-  toast(`Application queued to ${company}. Demo only.`);
+  toast('Application queued to ' + company + '. Demo only.');
   closeJob();
 }
 function openPost() { $("postModal").hidden = false; }
@@ -117,47 +110,47 @@ function submitPost(e) {
   const fd = new FormData(e.target);
   const job = {
     id: Date.now(),
-    title: fd.get("title"),
-    company: fd.get("company"),
-    location: fd.get("location"),
-    remote: /remote/i.test(fd.get("location")),
-    type: "Full-time",
-    pay: fd.get("pay"),
-    payMin: parseInt(String(fd.get("pay")).replace(/[^\d]/g, ""), 10) || 40,
-    visa: fd.get("visa") === "on",
-    junior: fd.get("junior") === "on",
-    takehome: fd.get("takehome") === "on",
-    hours: Number(fd.get("hours") || 2),
+    title: fd.get('title'),
+    company: fd.get('company'),
+    location: fd.get('location'),
+    remote: /remote/i.test(fd.get('location')),
+    type: 'Full-time',
+    pay: fd.get('pay'),
+    payMin: parseInt(String(fd.get('pay')).replace(/[^\d]/g, ''), 10) || 40,
+    visa: fd.get('visa') === 'on',
+    junior: fd.get('junior') === 'on',
+    takehome: fd.get('takehome') === 'on',
+    hours: Number(fd.get('hours') || 2),
     replyDays: 3,
-    posted: "Just now",
-    manager: "You (demo listing)",
-    blurb: "Posted from the ClearHire demo form.",
-    process: ["Intro call", "Working session", "Offer chat"]
+    posted: 'Just now',
+    manager: 'You (demo listing)',
+    blurb: 'Posted from the ClearHire demo form.',
+    process: ['Intro call', 'Working session', 'Offer chat']
   };
   extra.unshift(job);
-  localStorage.setItem("ch-extra", JSON.stringify(extra));
-  jobs = [...extra, ...JOBS];
+  localStorage.setItem('ch-extra', JSON.stringify(extra));
+  jobs = extra.concat(JOBS);
   closePost();
   applyFilters();
-  toast("Role published locally.");
+  toast('Role published locally.');
 }
-$("drawer").addEventListener("click", (e) => { if (e.target.id === "drawer") closeJob(); });
-$("postModal").addEventListener("click", (e) => { if (e.target.id === "postModal") closePost(); });
-["q","where","fRemote","fVisa","fJunior","fNoTH","fReply","fPay","fType","sort"].forEach((id) => {
-  $(id).addEventListener("input", applyFilters);
-  $(id).addEventListener("change", applyFilters);
+$('drawer').addEventListener('click', function(e) { if (e.target.id === 'drawer') closeJob(); });
+$('postModal').addEventListener('click', function(e) { if (e.target.id === 'postModal') closePost(); });
+['q','where','fRemote','fVisa','fJunior','fNoTH','fReply','fPay','fType','sort'].forEach(function(id) {
+  $(id).addEventListener('input', applyFilters);
+  $(id).addEventListener('change', applyFilters);
 });
-document.querySelectorAll("#quickPills button").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    btn.classList.toggle("on");
-    const on = btn.classList.contains("on");
-    const p = btn.dataset.preset;
-    if (p === "remote") $("fRemote").checked = on;
-    if (p === "visa") $("fVisa").checked = on;
-    if (p === "junior") $("fJunior").checked = on;
-    if (p === "notakehome") $("fNoTH").checked = on;
-    if (p === "salary") $("fPay").value = on ? 50 : 0;
-    if (p === "short") $("fNoTH").checked = on;
+document.querySelectorAll('#quickPills button').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    btn.classList.toggle('on');
+    var on = btn.classList.contains('on');
+    var p = btn.dataset.preset;
+    if (p === 'remote') $('fRemote').checked = on;
+    if (p === 'visa') $('fVisa').checked = on;
+    if (p === 'junior') $('fJunior').checked = on;
+    if (p === 'notakehome') $('fNoTH').checked = on;
+    if (p === 'salary') $('fPay').value = on ? 50 : 0;
+    if (p === 'short') $('fNoTH').checked = on;
     applyFilters();
   });
 });
