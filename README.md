@@ -1,2 +1,5 @@
-# clearhire
-ClearHire — a quieter job board with mandatory salary and process
+# ClearHire
+
+A quieter job board: salary required, process public, ghost jobs banned.
+
+Open `index.html` or deploy the folder as a static site.
