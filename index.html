@@ -3,96 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ClearHire — Jobs with the noise stripped out</title>
-  <meta name="description" content="A job board that requires salary, process, and a human reply. No ghost listings. No five-hour take-homes unless you opt in." />
+  <title>ClearHire — Jobs ranked for you</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@360;420;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="noise" aria-hidden="true"></div>
   <header class="top">
-    <a class="logo" href="#">
-      <span class="mark">CH</span>
-      ClearHire
-    </a>
-    <nav>
-      <a href="#jobs">Roles</a>
-      <a href="#rules">Our rules</a>
-      <a href="#employers">Employers</a>
-    </nav>
-    <button class="ghost" type="button" onclick="toast('Demo only — accounts coming next.')">Sign in</button>
+    <a class="logo" href="#"><span class="mark">CH</span>ClearHire</a>
+    <nav><a href="#match">Match me</a><a href="#jobs">Roles</a><a href="#rules">Rules</a></nav>
+    <button class="ghost" type="button" onclick="openPost()">Post a role</button>
   </header>
   <main>
     <section class="hero">
-      <p class="eyebrow">Unlike Indeed</p>
-      <h1>Every listing here has a salary, a process, and a person who will reply.</h1>
-      <p class="lede">We reject ghost jobs, “competitive salary”, and unpaid 8-hour assignments. Filter by visa, interview length, and whether they actually hire juniors.</p>
-      <form class="search" id="searchForm" onsubmit="return false">
-        <label class="field grow"><span>Role or skill</span><input id="q" type="search" placeholder="Product designer, React, nurse…" autocomplete="off" /></label>
-        <label class="field"><span>Where</span><input id="where" type="text" placeholder="Remote, London, NYC…" /></label>
-        <button class="solid" type="button" onclick="applyFilters()">Search</button>
-      </form>
-      <div class="pills" id="quickPills">
-        <button type="button" data-preset="remote">Remote</button>
-        <button type="button" data-preset="salary">£50k+</button>
-        <button type="button" data-preset="visa">Visa sponsorship</button>
-        <button type="button" data-preset="junior">Hires juniors</button>
-        <button type="button" data-preset="short">Interview &lt; 3 hrs</button>
-        <button type="button" data-preset="notakehome">No take-home</button>
+      <p class="eyebrow">Not Indeed</p>
+      <h1>We pick the best role for you. Ads do not.</h1>
+      <p class="lede">Fill in a short profile. Every listing is scored on pay, place, visa, seniority, and how long they will waste your time. Best match sits at the top.</p>
+    </section>
+    <section class="hero" id="match" style="padding-top:0">
+      <div class="matchbox">
+        <h2>Your match profile</h2>
+        <p class="fine">This stays on this phone. Change anything and the ranking updates instantly.</p>
+        <div class="gridf">
+          <label class="f">What you do<input id="pRole" placeholder="designer, nurse, react…" /></label>
+          <label class="f">Where you want to work<input id="pWhere" placeholder="Remote, London, Leeds…" /></label>
+          <label class="f">Minimum pay (k)<input id="pPay" type="number" min="0" max="300" value="40" /></label>
+          <label class="f">Max interview hours<input id="pHours" type="number" min="1" max="12" value="3" step="0.5" /></label>
+        </div>
+        <div class="checks">
+          <label class="check"><input type="checkbox" id="pRemote" /> Remote only</label>
+          <label class="check"><input type="checkbox" id="pVisa" /> I need sponsorship</label>
+          <label class="check"><input type="checkbox" id="pJunior" checked /> I’m junior / early career</label>
+          <label class="check"><input type="checkbox" id="pNoTH" checked /> Hide unpaid take-homes</label>
+        </div>
+        <div class="pills">
+          <button type="button" class="solid" onclick="rankNow()">Rank jobs for me</button>
+          <button type="button" class="ghost" onclick="resetProfile()">Reset profile</button>
+        </div>
       </div>
     </section>
     <section class="stats">
-      <div><strong>214</strong><span>live roles this week</span></div>
-      <div><strong>100%</strong><span>show real pay bands</span></div>
-      <div><strong>4.2d</strong><span>median time to first reply</span></div>
-      <div><strong>0</strong><span>listings without a named hiring manager</span></div>
+      <div><strong id="bestScore">—</strong><span>top match score</span></div>
+      <div><strong>0 ads</strong><span>ranking is never paid</span></div>
+      <div><strong>100%</strong><span>roles show a pay band</span></div>
+      <div><strong>named</strong><span>hiring manager on every post</span></div>
     </section>
     <section class="board" id="jobs">
       <aside class="filters">
-        <h2>Cut the noise</h2>
+        <h2>Tighten</h2>
         <label class="check"><input type="checkbox" id="fRemote" /> Remote-first</label>
         <label class="check"><input type="checkbox" id="fVisa" /> Sponsors visas</label>
         <label class="check"><input type="checkbox" id="fJunior" /> Open to juniors</label>
-        <label class="check"><input type="checkbox" id="fNoTH" /> No take-home task</label>
-        <label class="check"><input type="checkbox" id="fReply" /> Replies in 5 days</label>
-        <fieldset><legend>Minimum salary</legend><input type="range" id="fPay" min="0" max="120" value="0" step="5" /><div class="range-lab"><span id="payLab">Any</span></div></fieldset>
-        <fieldset><legend>Work type</legend><select id="fType"><option value="">Any</option><option>Full-time</option><option>Contract</option><option>Part-time</option></select></fieldset>
-        <button class="text" type="button" onclick="resetFilters()">Reset</button>
+        <label class="check"><input type="checkbox" id="fNoTH" /> No take-home</label>
+        <button class="text" type="button" onclick="clearSide()">Clear extra filters</button>
       </aside>
       <div class="results">
-        <div class="results-bar"><p id="count">Showing roles</p><select id="sort"><option value="new">Newest</option><option value="pay">Highest pay</option><option value="fast">Fastest reply</option></select></div>
+        <div class="results-bar"><p id="count">Ranked roles</p>
+          <select id="sort"><option value="match">Best match</option><option value="pay">Highest pay</option><option value="fast">Fastest reply</option></select>
+        </div>
         <div id="list" class="list"></div>
       </div>
     </section>
     <section class="rules" id="rules">
-      <h2>Rules Indeed won’t enforce</h2>
+      <h2>How matching works</h2>
       <div class="grid3">
-        <article><h3>Salary or it doesn’t ship</h3><p>No “DOE”. No “competitive”. A band in local currency is required or the post is rejected.</p></article>
-        <article><h3>Process on the tin</h3><p>Number of stages, take-home hours, and expected decision date are public before you apply.</p></article>
-        <article><h3>Ghost jobs get banned</h3><p>If a company goes 14 days with no reply across applicants, the listing is pulled and they lose posting rights for 30 days.</p></article>
-      </div>
-    </section>
-    <section class="employers" id="employers">
-      <div>
-        <h2>For teams who hire like adults</h2>
-        <p>You get fewer, better applicants because we filter people who refuse unpaid marathons and hidden pay. First 3 posts are free while we’re in demo.</p>
-        <button class="solid" type="button" onclick="openPost()">Post a role</button>
+        <article><h3>Score, not sponsorship</h3><p>Indeed boosts whoever pays. We score title fit, location, pay vs your floor, visa, junior-friendly, interview length, and reply speed.</p></article>
+        <article><h3>We show the why</h3><p>Every card says why it ranked there.</p></article>
+        <article><h3>Zero is allowed</h3><p>If nothing is a decent match we show nothing.</p></article>
       </div>
     </section>
   </main>
-  <footer><p>ClearHire demo · sample data only · not affiliated with Indeed</p></footer>
+  <footer><p>ClearHire · light demo · not affiliated with Indeed</p></footer>
   <div class="drawer" id="drawer" hidden><div class="drawer-card" id="drawerCard"></div></div>
   <div class="modal" id="postModal" hidden>
     <form class="modal-card" onsubmit="submitPost(event)">
       <h2>Post a role</h2>
-      <p class="fine">Demo stores in your browser only.</p>
-      <label>Title <input name="title" required placeholder="Staff product designer" /></label>
-      <label>Company <input name="company" required placeholder="Northline" /></label>
-      <label>Location <input name="location" required placeholder="Remote (UK)" /></label>
-      <label>Pay band <input name="pay" required placeholder="£75k–£95k" /></label>
-      <label>Interview hours <input name="hours" type="number" min="0" max="12" value="2" /></label>
+      <p class="fine">Saved on this device only.</p>
+      <label>Title <input name="title" required /></label>
+      <label>Company <input name="company" required /></label>
+      <label>Location <input name="location" required /></label>
+      <label>Pay band <input name="pay" required /></label>
+      <label>Interview hours <input name="hours" type="number" value="2" /></label>
       <label class="check"><input type="checkbox" name="visa" /> Visa sponsorship</label>
       <label class="check"><input type="checkbox" name="junior" /> Open to juniors</label>
       <label class="check"><input type="checkbox" name="takehome" /> Has a take-home</label>
